@@ -483,6 +483,25 @@ describe('SOAP Server', function() {
     });
   });
 
+  it('should not use chunked encoding and return Content-Length header', function(done) {
+    soap.createClient(test.baseUrl + '/stockquote?wsdl', function(err, client) {
+      var clientArgs = { tickerSymbol: 'AAPL'};
+
+      assert.ifError(err);
+      
+      client.on('response', function(body, response, eid) {
+        var headers = response.headers;
+        assert.notEqual(headers['content-length'], undefined);
+        assert.equal(headers['transfer-encoding'], undefined);
+      })
+
+      client.GetLastTradePrice(clientArgs, function(err, result, raw, headers) {
+        assert.ifError(err);
+        done();
+      });
+    });
+  });
+
 // NOTE: this is actually a -client- test
 /*
 it('should return a valid error if the server stops responding': function(done) {
